@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useNtpTime } from '../composable/useNtpTime.js'
 
 const router = useRouter()
-const TARGET_DATE = new Date('2026-05-04T22:00:00')
+const TARGET_DATE = new Date('2026-04-28T22:17:00')
 const { now, ntpReady, ntpError, ntpLoading, syncNtp } = useNtpTime()
 
 const diff = computed(() => {
