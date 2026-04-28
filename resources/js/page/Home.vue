@@ -4,11 +4,7 @@ import { useRouter } from 'vue-router'
 import { useNtpTime } from '../composable/useNtpTime.js'
 
 const router = useRouter()
-
-// ── Konfigurasi: ganti tanggal & jam pengumuman di sini ──
-// Format ISO dengan timezone eksplisit +07:00 (WIB)
-const TARGET_DATE = new Date('2026-04-28T22:00:00')
-
+const TARGET_DATE = new Date('2026-05-04T22:00:00')
 const { now, ntpReady, ntpError, ntpLoading, syncNtp } = useNtpTime()
 
 const diff = computed(() => {
@@ -27,7 +23,6 @@ const isExpired = computed(() =>
     ntpReady.value && now.value !== null && now.value >= TARGET_DATE
 )
 
-// Auto-redirect sekali saat countdown habis
 let redirected = false
 watch(isExpired, (val) => {
     if (val && !redirected) {
@@ -40,96 +35,118 @@ const pad = (n) => String(n).padStart(2, '0')
 </script>
 
 <template>
-    <div class="min-h-screen bg-[#0a0a0f] flex flex-col items-center justify-center relative overflow-hidden font-mono">
+    <div class="min-h-screen bg-blue-50 flex flex-col items-center justify-center px-5 py-12 relative overflow-hidden font-sans">
 
-        <!-- Background aurora blobs -->
+        <!-- Background decoration -->
         <div class="absolute inset-0 pointer-events-none">
-            <div class="aurora-blob aurora-1"></div>
-            <div class="aurora-blob aurora-2"></div>
-            <div class="aurora-blob aurora-3"></div>
-            <div class="grid-overlay"></div>
+            <!-- Blobs -->
+            <div class="absolute w-[700px] h-[700px] rounded-full bg-blue-200 opacity-60 blur-[80px] -top-72 -right-44"></div>
+            <div class="absolute w-[600px] h-[600px] rounded-full bg-blue-100 opacity-50 blur-[80px] -bottom-64 -left-36"></div>
+            <div class="absolute w-[400px] h-[400px] rounded-full bg-blue-300 opacity-15 blur-[80px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+            <!-- Dot grid -->
+            <div class="absolute inset-0" style="background-image: radial-gradient(circle, #93c5fd55 1px, transparent 1px); background-size: 36px 36px;"></div>
+            <!-- Wave top/bottom -->
+            <div class="absolute top-0 left-0 right-0 h-28" style="background: linear-gradient(to bottom, #dbeafe50, transparent)"></div>
+            <div class="absolute bottom-0 left-0 right-0 h-28" style="background: linear-gradient(to top, #dbeafe50, transparent)"></div>
         </div>
 
         <!-- Content -->
-        <div class="relative z-10 flex flex-col items-center text-center px-6">
+        <div class="relative z-10 flex flex-col items-center text-center">
 
             <!-- Badge -->
-            <div class="mb-8 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 text-amber-300 text-xs tracking-widest uppercase">
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block"></span>
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-300 bg-blue-50 text-blue-700 text-[0.68rem] font-bold tracking-[0.15em] uppercase mb-7 shadow-sm shadow-blue-200">
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                 Pengumuman Kelulusan 2025
             </div>
 
             <!-- Title -->
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-3 leading-tight">
-                <span class="text-white">Menuju</span><br>
-                <span class="gradient-text">Hari Istimewa</span>
+            <h1 class="text-5xl md:text-7xl font-extrabold leading-[1.05] tracking-tight text-blue-900 mb-4" style="font-family:'Plus Jakarta Sans',sans-serif; letter-spacing:-0.03em">
+                Menuju<br>
+                <span style="background: linear-gradient(135deg,#2563eb,#60a5fa,#93c5fd); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
+                    Hari Istimewa
+                </span>
             </h1>
 
-            <p class="text-slate-400 text-sm md:text-base mb-14 max-w-sm leading-relaxed">
+            <p class="text-sm text-slate-500 leading-relaxed max-w-sm mb-12">
                 Pengumuman kelulusan akan segera dibuka.<br>
                 Persiapkan dirimu untuk momen bersejarah ini.
             </p>
 
             <!-- ── Loading NTP ── -->
-            <div v-if="ntpLoading" class="flex flex-col items-center gap-5">
+            <div v-if="ntpLoading" class="flex flex-col items-center gap-4">
                 <div class="flex gap-2">
-          <span v-for="i in 3" :key="i"
-                class="w-2.5 h-2.5 rounded-full bg-amber-400 dot-bounce"
-                :style="{ animationDelay: `${(i - 1) * 0.18}s` }">
-          </span>
+                    <span v-for="i in 3" :key="i"
+                          class="w-2.5 h-2.5 rounded-full bg-blue-500 block animate-bounce"
+                          :style="{ animationDelay: `${(i-1)*0.18}s` }">
+                    </span>
                 </div>
-                <p class="text-slate-500 text-xs tracking-widest uppercase">Menyinkronkan waktu server NTP…</p>
+                <p class="text-[0.72rem] font-semibold tracking-[0.12em] uppercase text-blue-300">
+                    Menyinkronkan waktu server NTP…
+                </p>
             </div>
 
             <!-- ── NTP Gagal ── -->
             <div v-else-if="ntpError" class="flex flex-col items-center gap-4 max-w-xs">
                 <div class="text-5xl">⚠️</div>
-                <p class="text-rose-400 text-sm font-semibold">Gagal terhubung ke server waktu</p>
-                <p class="text-slate-500 text-xs leading-relaxed">
+                <p class="text-sm font-bold text-red-500 m-0">Gagal terhubung ke server waktu</p>
+                <p class="text-[0.78rem] text-slate-500 leading-relaxed m-0">
                     Tidak dapat memverifikasi waktu dari NTP.<br>
                     Pastikan perangkat terhubung ke internet.
                 </p>
                 <button @click="syncNtp"
-                        class="mt-1 px-5 py-2.5 text-xs font-bold tracking-widest uppercase rounded-xl border border-amber-400/40 text-amber-300 bg-amber-400/10 hover:bg-amber-400/20 transition-all">
+                        class="mt-1 px-5 py-2.5 rounded-xl border border-blue-300 bg-blue-50 text-blue-700 text-[0.75rem] font-bold tracking-[0.1em] uppercase cursor-pointer transition-all hover:bg-blue-100 hover:shadow-md hover:-translate-y-0.5">
                     ↻ Coba Lagi
                 </button>
             </div>
 
             <!-- ── Countdown Aktif ── -->
             <template v-else-if="!isExpired && diff">
-                <div class="grid grid-cols-4 gap-4 md:gap-6">
-                    <div v-for="(item, i) in [
-            { label: 'Hari',   value: diff.days    },
-            { label: 'Jam',    value: diff.hours   },
-            { label: 'Menit',  value: diff.minutes },
-            { label: 'Detik',  value: diff.seconds },
-          ]" :key="i" class="countdown-card">
-                        <span class="countdown-number">{{ pad(item.value) }}</span>
-                        <span class="countdown-label">{{ item.label }}</span>
+                <div class="grid grid-cols-4 gap-3 md:gap-4">
+                    <div
+                        v-for="(item, i) in [
+                            { label: 'Hari',   value: diff.days    },
+                            { label: 'Jam',    value: diff.hours   },
+                            { label: 'Menit',  value: diff.minutes },
+                            { label: 'Detik',  value: diff.seconds },
+                        ]"
+                        :key="i"
+                        class="flex flex-col items-center bg-white border border-blue-100 rounded-2xl px-5 py-5 min-w-[76px] shadow-md shadow-blue-100 transition-transform duration-200 hover:-translate-y-1"
+                        style="box-shadow: 0 2px 8px rgba(37,99,235,.08), 0 8px 32px rgba(37,99,235,.1)"
+                    >
+                        <span class="text-4xl md:text-5xl font-medium leading-none text-blue-700 tracking-tight" style="font-family:'DM Mono',monospace;">
+                            {{ pad(item.value) }}
+                        </span>
+                        <span class="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-blue-300 mt-2.5">
+                            {{ item.label }}
+                        </span>
                     </div>
                 </div>
 
                 <!-- NTP indicator -->
-                <div class="mt-10 inline-flex items-center gap-2 text-slate-600 text-xs">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
+                <div class="inline-flex items-center gap-2 mt-8 text-[0.7rem] text-slate-400 font-medium">
+                    <span class="relative flex w-2.5 h-2.5 flex-shrink-0">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-60"></span>
+                        <span class="relative inline-flex w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                    </span>
                     Waktu disinkronkan dari NTP Server · WIB (UTC+7)
                 </div>
 
-                <p class="mt-4 text-slate-700 text-xs tracking-widest uppercase">
+                <p class="mt-3 text-[0.68rem] font-semibold tracking-[0.1em] uppercase text-slate-300">
                     Halaman login akan terbuka secara otomatis
                 </p>
             </template>
 
             <!-- ── Countdown Selesai ── -->
-            <div v-else-if="isExpired" class="flex flex-col items-center gap-4 animate-fade-in">
+            <div v-else-if="isExpired" class="flex flex-col items-center gap-3 animate-[fadeRise_0.6s_ease_both]">
                 <div class="text-6xl">🎓</div>
-                <p class="text-2xl font-bold text-white tracking-wide">Saatnya Pengumuman!</p>
-                <p class="text-slate-400 text-sm">Mengalihkan ke halaman login…</p>
-                <div class="mt-2 w-48 h-1 rounded-full bg-slate-800 overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-amber-400 to-rose-400 animate-progress"></div>
+                <p class="text-2xl font-extrabold text-blue-900 tracking-tight m-0" style="font-family:'Plus Jakarta Sans',sans-serif">
+                    Saatnya Pengumuman!
+                </p>
+                <p class="text-[0.8rem] text-slate-500 m-0">Mengalihkan ke halaman login…</p>
+                <div class="w-48 h-1 rounded-full bg-blue-100 overflow-hidden mt-2">
+                    <div class="h-full rounded-full animate-[progress_1.5s_linear_forwards]"
+                         style="background: linear-gradient(90deg, #1d4ed8, #60a5fa)">
+                    </div>
                 </div>
             </div>
 
@@ -138,60 +155,14 @@ const pad = (n) => String(n).padStart(2, '0')
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
-* { font-family: 'Space Mono', monospace; }
-h1 { font-family: 'Syne', sans-serif; }
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
-.aurora-blob {
-    position: absolute; border-radius: 50%;
-    filter: blur(80px); opacity: 0.18;
-    animation: drift 12s ease-in-out infinite alternate;
+@keyframes fadeRise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-.aurora-1 { width:600px;height:600px;background:radial-gradient(circle,#f59e0b,transparent 70%);top:-200px;left:-100px;animation-duration:14s; }
-.aurora-2 { width:500px;height:500px;background:radial-gradient(circle,#e11d48,transparent 70%);bottom:-150px;right:-80px;animation-duration:10s; }
-.aurora-3 { width:400px;height:400px;background:radial-gradient(circle,#7c3aed,transparent 70%);top:40%;left:50%;transform:translate(-50%,-50%);animation-duration:17s; }
-@keyframes drift { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(40px,30px) scale(1.1)} }
-
-.grid-overlay {
-    position:absolute;inset:0;
-    background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
-    background-size:60px 60px;
+@keyframes progress {
+    from { width: 0%; }
+    to   { width: 100%; }
 }
-
-.gradient-text {
-    background:linear-gradient(135deg,#fbbf24,#f43f5e);
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-
-.countdown-card {
-    display:flex;flex-direction:column;align-items:center;
-    padding:20px 24px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
-    border-radius:16px;backdrop-filter:blur(12px);min-width:72px;
-    box-shadow:0 0 30px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06);
-    transition:transform .2s;
-}
-.countdown-card:hover { transform:translateY(-4px); }
-
-.countdown-number {
-    font-family:'Syne',sans-serif;font-size:2.8rem;font-weight:800;line-height:1;
-    background:linear-gradient(180deg,#fff 60%,rgba(255,255,255,.4));
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.countdown-label { font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:#64748b;margin-top:8px; }
-
-/* Dot bounce */
-@keyframes dot-bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-.dot-bounce { animation:dot-bounce .75s ease-in-out infinite; }
-
-/* Fade in */
-@keyframes fade-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-.animate-fade-in { animation:fade-in .6s ease both; }
-
-/* Progress */
-@keyframes progress { from{width:0%} to{width:100%} }
-.animate-progress { animation:progress 1.5s linear forwards; }
-
-/* Ping */
-@keyframes ping { 75%,100%{transform:scale(2);opacity:0} }
-.animate-ping { animation:ping 1.2s cubic-bezier(0,0,.2,1) infinite; }
 </style>
