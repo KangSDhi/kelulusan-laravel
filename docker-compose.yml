@@ -1,0 +1,22 @@
+name: graduation-services
+
+services:
+    db:
+        image: mariadb:10.5.15
+        container_name: graduation-db
+
+        ports:
+            - "3306:3306"
+
+        environment:
+            MARIADB_ROOT_PASSWORD: 'toor'
+            MARIADB_DATABASE: ${DB_DATABASE}
+            MARIADB_USER: ${DB_USERNAME}
+            MARIADB_PASSWORD: ${DB_PASSWORD}
+
+        volumes:
+            -   graduation-data:/var/lib/mysql
+
+volumes:
+    graduation-data:
+        driver: local
