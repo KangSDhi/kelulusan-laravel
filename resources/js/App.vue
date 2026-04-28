@@ -3,7 +3,5 @@
 </script>
 
 <template>
-    <div class="flex min-h-screen">
-        Halo Vue
-    </div>
+    <router-view></router-view>
 </template>
