@@ -9,3 +9,8 @@ use App\Http\Controllers\Api\AuthController as Auth;
 //})->middleware('auth:sanctum');
 
 Route::post('/auth/login', [Auth::class, 'login']);
+Route::post('/auth/login/graduation', [Auth::class, 'loginGraduation']);
+
+Route::middleware('auth:api,graduation_api')->group(function () {
+    Route::get('/auth/check/user', [Auth::class, 'checkUser']);
+});

@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useNtpTime } from '../composable/useNtpTime.js'
 
 const router = useRouter()
-const TARGET_DATE = new Date('2026-04-28T22:17:00')
+const TARGET_DATE = new Date('2026-04-29T12:08:00')
 const { now, ntpReady, ntpError, ntpLoading, syncNtp } = useNtpTime()
 
 const diff = computed(() => {
@@ -56,7 +56,7 @@ const pad = (n) => String(n).padStart(2, '0')
             <!-- Badge -->
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-300 bg-blue-50 text-blue-700 text-[0.68rem] font-bold tracking-[0.15em] uppercase mb-7 shadow-sm shadow-blue-200">
                 <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                Pengumuman Kelulusan 2025
+                Pengumuman Kelulusan 2026
             </div>
 
             <!-- Title -->

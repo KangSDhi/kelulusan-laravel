@@ -45,7 +45,11 @@ return [
         'api' => [
             'driver' => 'jwt',
             'provider' => 'users',
-        ]
+        ],
+        'graduation_api' => [ // Tambahkan guard baru
+            'driver' => 'jwt',
+            'provider' => 'graduations',
+        ],
     ],
 
     /*
@@ -69,6 +73,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+        'graduations' => [ // Tambahkan provider baru
+            'driver' => 'eloquent',
+            'model' => App\Models\Graduation::class,
         ],
 
         // 'users' => [

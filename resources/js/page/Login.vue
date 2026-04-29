@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNtpTime } from '../composable/useNtpTime.js'
+import axios from 'axios'
 
 const router = useRouter()
 const nisn = ref('')
@@ -10,7 +11,7 @@ const loading = ref(false)
 const error = ref('')
 const shake = ref(false)
 
-const TARGET_DATE = new Date('2026-04-28T22:17:00')
+const TARGET_DATE = new Date('2026-04-29T12:08:00')
 const { now, ntpReady, ntpError, ntpLoading } = useNtpTime()
 
 watch([ntpReady, ntpError], () => {
@@ -26,11 +27,33 @@ async function handleLogin() {
     if (!ntpReady.value || !now.value || now.value < TARGET_DATE) {
         triggerShake('Sistem belum siap atau waktu belum valid.'); return
     }
+
     loading.value = true
     error.value = ''
-    await new Promise(r => setTimeout(r, 1800))
-    loading.value = false
-    triggerShake('NISN atau Tanggal Lahir tidak ditemukan.')
+
+    try {
+        const response = await axios.post('/api/auth/login/graduation', {
+            nisn: nisn.value.trim(),
+            tanggal_lahir: tanggalLahir.value
+        })
+
+        const { access_token, token_type, data: userData } = response.data
+
+        // Simpan token & data user ke localStorage
+        localStorage.setItem('graduation_token', access_token)
+        localStorage.setItem('graduation_token_type', token_type)
+        localStorage.setItem('graduation_user', JSON.stringify(userData))
+
+        // Set default Authorization header untuk request berikutnya
+        axios.defaults.headers.common['Authorization'] = `${token_type} ${access_token}`
+
+        router.push({ name: 'Dashboard Page' })
+    } catch (err) {
+        const msg = err.response?.data?.message || 'NISN atau Tanggal Lahir tidak ditemukan.'
+        triggerShake(msg)
+    } finally {
+        loading.value = false
+    }
 }
 
 function triggerShake(msg) {
@@ -56,7 +79,7 @@ function triggerShake(msg) {
                 <div class="flex flex-col items-center gap-4">
                     <div class="w-11 h-11 border-[3px] border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
                     <p class="font-bold text-[0.95rem] text-blue-800 m-0" style="font-family:'Plus Jakarta Sans',sans-serif">
-                        Menyinkronkan waktu server…
+                        Menyinkronkan waktu server...
                     </p>
                     <p class="text-[0.75rem] text-blue-300 m-0">Mohon tunggu sebentar</p>
                 </div>
@@ -138,7 +161,7 @@ function triggerShake(msg) {
                                 <input
                                     v-model="tanggalLahir"
                                     type="date"
-                                    class="w-full bg-blue-50/60 border border-blue-100 rounded-xl pl-10 pr-3.5 py-3 text-[0.82rem] text-blue-900 outline-none transition-all focus:border-blue-400 focus:bg-blue-50 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)] color-scheme-light"
+                                    class="w-full bg-blue-50/60 border border-blue-100 rounded-xl pl-10 pr-3.5 py-3 text-[0.82rem] text-blue-900 outline-none transition-all focus:border-blue-400 focus:bg-blue-50 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
                                     style="font-family:'DM Mono',monospace; color-scheme: light;"
                                 />
                             </div>
@@ -158,7 +181,7 @@ function triggerShake(msg) {
                         <button
                             @click="handleLogin"
                             :disabled="loading || !ntpReady"
-                            class="w-full mt-1 py-3.5 rounded-xl font-bold text-[0.88rem] text-white tracking-wide border-none cursor-pointer transition-all disabled:opacity-55 disabled:cursor-not-allowed hover:not-disabled:-translate-y-0.5 hover:not-disabled:shadow-xl"
+                            class="w-full mt-1 py-3.5 rounded-xl font-bold text-[0.88rem] text-white tracking-wide border-none cursor-pointer transition-all disabled:opacity-55 disabled:cursor-not-allowed"
                             style="background: linear-gradient(135deg,#1d4ed8,#3b82f6); box-shadow: 0 4px 20px rgba(37,99,235,.38); font-family:'Plus Jakarta Sans',sans-serif; letter-spacing:0.02em"
                         >
                             <span v-if="!loading" class="flex items-center justify-center gap-2">
@@ -172,14 +195,14 @@ function triggerShake(msg) {
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                 </svg>
-                                Memverifikasi…
+                                Memverifikasi...
                             </span>
                         </button>
                     </div>
 
                     <!-- Footer -->
                     <p class="text-center text-[0.68rem] text-slate-400 pb-5 px-9">
-                        © 2025 · Sistem Pengumuman Kelulusan
+                        © 2026 · Sistem Pengumuman Kelulusan
                     </p>
                 </div>
             </div>
